@@ -15635,11 +15635,11 @@
     "sqlx": {
       "flake": false,
       "locked": {
-        "lastModified": 1718933212,
-        "narHash": "sha256-i6166HvCmasG0LiZV978zvtcjF4EtUmHD/TYCBoOJEg=",
+        "lastModified": 1720762249,
+        "narHash": "sha256-Qvde2Ylrbl+ZY1EogECWy/T6vNbK4/ckucLNpc6hf8Y=",
         "owner": "launchbadge",
         "repo": "sqlx",
-        "rev": "0eb2ee93650eaf10d9cadc107a88bfabfdf377a7",
+        "rev": "0db12a9846c4d3649d94ccdbf4deebb230801735",
         "type": "github"
       },
       "original": {

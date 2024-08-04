@@ -9348,11 +9348,11 @@
         "proto-nix": "proto-nix"
       },
       "locked": {
-        "lastModified": 1719308846,
-        "narHash": "sha256-Sc/O+6NTASd83x0gQnK+24thf/hq6v4oAP8THfxW77w=",
+        "lastModified": 1722584198,
+        "narHash": "sha256-5PGwj13dnf8eTb0VL7NoGpRRRWmw5y/XoxDIC1f+1V4=",
         "owner": "mlabs-haskell",
         "repo": "lambda-buffers",
-        "rev": "401f8a920a557c71440795174da199a1e128c4f9",
+        "rev": "3920a52741bcde8bbba5bc63925fc17f2fe062d5",
         "type": "github"
       },
       "original": {
@@ -15635,11 +15635,11 @@
     "sqlx": {
       "flake": false,
       "locked": {
-        "lastModified": 1722128660,
-        "narHash": "sha256-vQCRCfuDkONTwW7SB6tNo4q7bstCzV0MJSRP43n/d0k=",
+        "lastModified": 1722551802,
+        "narHash": "sha256-IPY9DaQnhrEVvnlTFFBCSRFXDpgd/neUHcJwBg/A8HU=",
         "owner": "launchbadge",
         "repo": "sqlx",
-        "rev": "cc481827d948c25b91c079dd02b534c53730efda",
+        "rev": "4acecfc636f82d07ca89dd2eb0def66acc81b4c3",
         "type": "github"
       },
       "original": {

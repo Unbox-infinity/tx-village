@@ -11,16 +11,18 @@ use itertools::Itertools;
 use num_bigint::BigInt;
 use plutus_ledger_api::csl::{lib as csl, pla_to_csl::TryToCSL};
 use plutus_ledger_api::plutus_data::IsPlutusData;
-use plutus_ledger_api::v2::address::{Address, AddressWithExtraInfo, Credential};
-use plutus_ledger_api::v2::crypto::PaymentPubKeyHash;
-use plutus_ledger_api::v2::datum::{Datum, DatumHash, OutputDatum};
-use plutus_ledger_api::v2::redeemer::{Redeemer, RedeemerWithExtraInfo};
-use plutus_ledger_api::v2::script::{MintingPolicyHash, ScriptHash, ValidatorHash};
-use plutus_ledger_api::v2::transaction::{
-    ScriptPurpose, TransactionHash, TransactionInfo, TransactionInput, TransactionOutput,
-    TransactionOutputWithExtraInfo, TxInInfo,
+use plutus_ledger_api::v2::{
+    address::{Address, AddressWithExtraInfo, Credential},
+    crypto::PaymentPubKeyHash,
+    datum::{Datum, DatumHash, OutputDatum},
+    redeemer::{Redeemer, RedeemerWithExtraInfo},
+    script::{MintingPolicyHash, ScriptHash, ValidatorHash},
+    transaction::{
+        ScriptPurpose, TransactionHash, TransactionInfo, TransactionInput, TransactionOutput,
+        TransactionOutputWithExtraInfo, TxInInfo,
+    },
+    value::{CurrencySymbol, Value},
 };
-use plutus_ledger_api::v2::value::{CurrencySymbol, Value};
 use std::collections::BTreeMap;
 use submitter::Submitter;
 use tracing::{debug, info};

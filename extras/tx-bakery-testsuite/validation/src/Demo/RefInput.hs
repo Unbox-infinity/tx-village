@@ -3,15 +3,14 @@ module Demo.RefInput (refInputMintingPolicy) where
 import LambdaBuffers.Demo.Plutus.Plutarch (EqDatum, RefInputRedeemer (RefInputRedeemer))
 import LambdaBuffers.Runtime.Plutarch ()
 import LambdaBuffers.Runtime.Plutarch.LamVal (pfromPlutusDataPTryFrom)
-import Plutarch (ClosedTerm, perror, plam, popaque, unTermCont)
-import Plutarch.Api.V2 qualified as V2
-import Plutarch.Prelude (PBool (PFalse), PEq ((#==)), PMaybe (PJust), pcon, pconstant, pfield, pfind, pfromData, pif, pletC, pmatch, pmatchC, ptrace, (#))
+import Plutarch.LedgerApi.V2 qualified as V2
+import Plutarch.Prelude (ClosedTerm, PBool (PFalse), PData, PEq ((#==)), PMaybe (PJust), POpaque, PUnit (PUnit), pcon, perror, pfield, pfind, pfromData, pif, plam, pletC, pmatch, pmatchC, popaque, ptraceInfo, unTermCont, (#), (:-->))
 
 {- | `eqValidator dat rdmr ctx` is a simple minting policy allowing to mint when the the redeemer
 has a reference input to an EqValidator UTxO with a given inline datum
 -}
-refInputMintingPolicy :: ClosedTerm V2.PMintingPolicy
-refInputMintingPolicy = plam $ \redeemer ctx -> ptrace "[RefMint]" $ unTermCont $ do
+refInputMintingPolicy :: ClosedTerm (PData :--> V2.PScriptContext :--> POpaque)
+refInputMintingPolicy = plam $ \redeemer ctx -> ptraceInfo "[RefMint]" $ unTermCont $ do
   RefInputRedeemer refEqDatum refTxOutRef <-
     pmatchC $ pfromData $ pfromPlutusDataPTryFrom @RefInputRedeemer # redeemer
 
@@ -33,4 +32,4 @@ refInputMintingPolicy = plam $ \redeemer ctx -> ptrace "[RefMint]" $ unTermCont 
               pure $ pfromData refEqDatum #== storedEqDatum
             _ -> pcon PFalse
 
-  pure $ pif validates (popaque (pconstant ())) (ptrace "[RefMint] Validation failed" perror)
+  pure $ pif validates (popaque (pcon PUnit)) (ptraceInfo "[RefMint] Validation failed" perror)

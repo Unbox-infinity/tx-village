@@ -1,13 +1,10 @@
 #[cfg(test)]
 mod plutus_database_roundtrips {
     use num_bigint::BigInt;
-    use pla::goldens::{
-        v1::{
-            sample_address, sample_currency_symbol, sample_datum_hash, sample_ed25519_pub_key_hash,
-            sample_staking_credential, sample_token_name, sample_transaction_hash,
-            sample_transaction_input, sample_value,
-        },
-        v2::{sample_output_datum, sample_transaction_output, sample_tx_in_info},
+    use pla::goldens::v3::{
+        sample_address, sample_currency_symbol, sample_datum_hash, sample_ed25519_pub_key_hash,
+        sample_output_datum, sample_staking_credential, sample_token_name, sample_transaction_hash,
+        sample_transaction_input, sample_transaction_output, sample_tx_in_info, sample_value,
     };
     use plutus_ledger_api as pla;
     use tx_indexer::database::plutus::*;
@@ -391,19 +388,19 @@ mod plutus_database_roundtrips {
         )
     }
 
-    fn sample_script_hash() -> pla::v2::script::ScriptHash {
-        pla::v2::script::ScriptHash(pla::v2::crypto::LedgerBytes([1].repeat(28).to_vec()))
+    fn sample_script_hash() -> pla::v3::script::ScriptHash {
+        pla::v3::script::ScriptHash(pla::v3::crypto::LedgerBytes([1].repeat(28).to_vec()))
     }
 
-    fn sample_credential() -> pla::v2::address::Credential {
-        pla::v2::address::Credential::Script(pla::v2::script::ValidatorHash(sample_script_hash()))
+    fn sample_credential() -> pla::v3::address::Credential {
+        pla::v3::address::Credential::Script(pla::v3::script::ValidatorHash(sample_script_hash()))
     }
 
-    fn sample_chain_pointer() -> pla::v2::address::ChainPointer {
-        pla::v2::address::ChainPointer {
-            slot_number: pla::v2::address::Slot(134561.into()),
-            transaction_index: pla::v2::address::TransactionIndex(4.into()),
-            certificate_index: pla::v2::address::CertificateIndex(10.into()),
+    fn sample_chain_pointer() -> pla::v3::address::ChainPointer {
+        pla::v3::address::ChainPointer {
+            slot_number: pla::v3::address::Slot(134561.into()),
+            transaction_index: pla::v3::address::TransactionIndex(4.into()),
+            certificate_index: pla::v3::address::CertificateIndex(10.into()),
         }
     }
 }

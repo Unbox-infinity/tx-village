@@ -90,6 +90,7 @@ library
     , lbf-tx-bakery-tests-plutus-api-plutarch
     , lbr-plutarch
     , plutarch
+    , plutarch-ledger-api
 
   hs-source-dirs:  src
   exposed-modules:

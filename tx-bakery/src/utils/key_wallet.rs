@@ -7,8 +7,10 @@ use anyhow::anyhow;
 use data_encoding::HEXLOWER;
 use futures::future::OptionFuture;
 use plutus_ledger_api::csl::{csl_to_pla::ToPLA, lib as csl};
-use plutus_ledger_api::v2::address::{Address, Credential, StakingCredential};
-use plutus_ledger_api::v2::crypto::Ed25519PubKeyHash;
+use plutus_ledger_api::v3::{
+    address::{Address, Credential, StakingCredential},
+    crypto::Ed25519PubKeyHash,
+};
 use thiserror::Error;
 use tokio;
 use tokio::fs;

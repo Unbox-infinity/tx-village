@@ -32,7 +32,12 @@
             self'.packages.tx-bakery-tests
           ];
 
-          devShellHook = config.settings.shell.hook;
+          devShellHook = config.settings.shell.hook + ''
+            echo "TxBakery testsuite"
+            echo ""
+            echo "Run tx-bakery-tests to execute the testsuite."
+            echo ""
+          '';
         };
     in
     {

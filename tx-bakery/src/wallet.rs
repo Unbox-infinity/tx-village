@@ -2,7 +2,7 @@
 
 use plutus_ledger_api::{
     csl::lib as csl,
-    v2::{address::Address, crypto::Ed25519PubKeyHash},
+    v3::{address::Address, crypto::Ed25519PubKeyHash},
 };
 use thiserror::Error;
 

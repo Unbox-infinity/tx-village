@@ -21,6 +21,7 @@
 
           # Plutarch itself
           "${inputs.plutarch}"
+          "${inputs.plutarch}/plutarch-ledger-api"
 
           # Demo API
           "${config.packages.lbf-tx-bakery-tests-plutus-api-plutarch}"

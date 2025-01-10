@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use itertools::Itertools;
 use num_bigint::BigInt;
 use oura::model as oura;
-use plutus_ledger_api::v2::{
+use plutus_ledger_api::v3::{
     address::Address,
     datum::{Datum, DatumHash, OutputDatum},
     redeemer::Redeemer,
@@ -16,7 +16,7 @@ use plutus_ledger_api::v2::{
 };
 use serde_with::serde_as;
 use std::fmt::Debug;
-use std::{collections::HashMap, sync::atomic::Ordering};
+use std::{collections::BTreeMap, sync::atomic::Ordering};
 use tracing::{event, Level};
 
 /// Indication of when an event happened in the context of the chain.
@@ -39,7 +39,7 @@ pub enum ChainEvent {
     /// Rollback event occurred
     RollbackEvent { block_slot: u64, block_hash: String },
 
-    /// Chain syncronisation progressed
+    /// Chain synchronisation progressed
     SyncProgressEvent {
         block_slot: u64,
         block_hash: String,
@@ -59,10 +59,10 @@ pub struct TransactionEventRecord {
     pub outputs: Vec<TxInInfo>,
     pub mint: Value,
     #[serde_as(as = "Vec<(_, _)>")]
-    pub redeemers: HashMap<ScriptPurpose, Redeemer>,
+    pub redeemers: BTreeMap<ScriptPurpose, Redeemer>,
 
     #[serde_as(as = "Vec<(_, _)>")]
-    pub plutus_data: HashMap<DatumHash, Datum>,
+    pub plutus_data: BTreeMap<DatumHash, Datum>,
     // TODO(chase): Which of these would be realistically be interested in?
     // pub vkey_witnesses: Option<Vec<VKeyWitnessRecord>>,
     // pub native_witnesses: Option<Vec<NativeWitnessRecord>>,

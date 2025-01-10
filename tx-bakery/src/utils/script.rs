@@ -3,7 +3,7 @@
 use anyhow::anyhow;
 use plutus_ledger_api::{
     csl::{csl_to_pla::ToPLA, lib as csl},
-    v2::{
+    v3::{
         script::{MintingPolicyHash, ScriptHash, ValidatorHash},
         transaction::TransactionInput,
     },
@@ -26,16 +26,40 @@ pub enum ScriptOrRef {
     PlutusScript(csl::PlutusScript),
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PlutusVersion {
+    V1,
+    V2,
+    V3,
+}
+
 impl ScriptOrRef {
-    // TODO: Handle plutus versions
-    pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
+    pub fn from_bytes(bytes: Vec<u8>, version: PlutusVersion) -> Result<Self> {
         let mut serializer = cbor_event::se::Serializer::new_vec();
         serializer.write_bytes(bytes).unwrap();
         let script_bytes = serializer.finalize();
 
-        let script = csl::PlutusScript::from_bytes_v2(script_bytes)
-            .map_err(|source| Error::ConversionError(anyhow!(source)))?;
+        let script = match version {
+            PlutusVersion::V1 => csl::PlutusScript::from_bytes(script_bytes)
+                .map_err(|source| Error::ConversionError(anyhow!(source)))?,
+            PlutusVersion::V2 => csl::PlutusScript::from_bytes_v2(script_bytes)
+                .map_err(|source| Error::ConversionError(anyhow!(source)))?,
+            PlutusVersion::V3 => csl::PlutusScript::from_bytes_v3(script_bytes)
+                .map_err(|source| Error::ConversionError(anyhow!(source)))?,
+        };
         Ok(ScriptOrRef::PlutusScript(script))
+    }
+
+    pub fn from_bytes_v1(bytes: Vec<u8>) -> Result<Self> {
+        Self::from_bytes(bytes, PlutusVersion::V1)
+    }
+
+    pub fn from_bytes_v2(bytes: Vec<u8>) -> Result<Self> {
+        Self::from_bytes(bytes, PlutusVersion::V2)
+    }
+
+    pub fn from_bytes_v3(bytes: Vec<u8>) -> Result<Self> {
+        Self::from_bytes(bytes, PlutusVersion::V3)
     }
 
     pub fn from_script(script: Script) -> Result<Self> {

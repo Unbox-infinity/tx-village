@@ -1,28 +1,31 @@
 [package]
 name = "tx-bakery-ogmios"
-version = "2.0.0-beta.3"
+version = "2.0.0-beta.4"
 edition = "2021"
+license = "Apache-2.0"
+description = "Ogmios chain query client for TxBakery"
+repository = "https://github.com/mlabs-haskell/tx-village"
 
 [dependencies]
-tx-bakery = { version = "2.0.0-beta.3", path = ".extras/tx-bakery-v2" }
-tokio = { version = "1.24.2", features = ["full"] }
+tx-bakery = { version = "2.0.0-beta.4", path = ".extras/tx-bakery-v2" }
+tokio = { version = "1.43.0", features = ["full"] }
 tracing = "0.1"
-anyhow = { version = "1.0.79", features = ["backtrace"] }
-thiserror = "1.0.57"
-chrono = "0.4.35"
+anyhow = { version = "1.0.95", features = ["backtrace"] }
+thiserror = "1.0.69"
+chrono = "0.4.39"
 nix = { version = "0.28.0", features = ["signal"] }
-data-encoding = "2.5.0"
+data-encoding = "2.6.0"
 derive_builder = "0.12.0"
-plutus-ledger-api = { version = "2.1.0", features = ["lbf", "chrono"] }
-serde = "1.0.195"
-serde_json = "1.0.122"
-reqwest = { version = "0.11.23", features = ["json"] }
-jsonrpsee = { version = "0.22.2", features = ["ws-client", "macros"] }
+plutus-ledger-api = { version = "3.0.1", features = ["lbf", "chrono"] }
+serde = "1.0.217"
+serde_json = "1.0.135"
+reqwest = { version = "0.11.27", features = ["json"] }
+jsonrpsee = { version = "0.22.5", features = ["ws-client", "macros"] }
 num-bigint = "0.4.6"
 cbor_event = "2.4.0"
 hex = "0.4.3"
-url = "2.5.2"
-clap = { version = "4.5.14", features = ["derive"], optional = true }
+url = "2.5.4"
+clap = { version = "4.5.24", features = ["derive"], optional = true }
 num = "0.4.3"
 
 [features]

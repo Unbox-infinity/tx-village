@@ -1,7 +1,7 @@
 use num_bigint::BigInt;
 use plutus_ledger_api::{
     csl::{csl_to_pla::TryFromCSLError, lib as csl, pla_to_csl::TryFromPLAError},
-    v2::{
+    v3::{
         datum::DatumHash,
         script::ScriptHash,
         transaction::{TransactionInput, TxInInfo},

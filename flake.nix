@@ -27,7 +27,7 @@
 
     oura = {
       flake = false;
-      url = "github:szg251/oura?ref=szg251/add-ref-script";
+      url = "github:szg251/oura?ref=v1.9.1";
     };
 
     cardano-nix.url = "github:mlabs-haskell/cardano.nix";

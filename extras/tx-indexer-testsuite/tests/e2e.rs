@@ -5,7 +5,7 @@ mod e2e_tests {
     use plutus_ledger_api::{
         json::Json,
         plutus_data::IsPlutusData,
-        v2::{
+        v3::{
             crypto::LedgerBytes,
             datum::OutputDatum,
             redeemer::Redeemer,
@@ -168,7 +168,7 @@ mod e2e_tests {
         ogmios: &OgmiosClient,
     ) -> (TransactionHash, TransactionInfo) {
         let mp: Vec<u8> = Json::from_json_string("\"WD8BAAAyIlMwA0kBBFtFUV0AFTM1c0ZuHN1oASQUgmKTCpmAGkkWW0VRXSBWYWxpZGF0aW9uIGZhaWxlZAAWVzk=\"").unwrap();
-        let minting_policy = ScriptOrRef::from_bytes(mp).unwrap().as_minting_policy();
+        let minting_policy = ScriptOrRef::from_bytes_v2(mp).unwrap().as_minting_policy();
 
         let own_utxos = ogmios
             .query_utxos_by_addr(&wallet.get_change_addr())

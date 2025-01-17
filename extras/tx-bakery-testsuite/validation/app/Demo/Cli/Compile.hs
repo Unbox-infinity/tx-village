@@ -7,7 +7,7 @@ import Demo.RefInput (refInputMintingPolicy)
 import Demo.Validation (eqValidator)
 import LambdaBuffers.Demo.Config (Config (Config, config'eqValidator, config'mintingPolicy, config'refInputMintingPolicy), Script (Script))
 import LambdaBuffers.Runtime.Prelude (toJsonBytes)
-import Plutarch qualified (Config (Config), TracingMode (DoTracing, NoTracing), compile)
+import Plutarch.Internal.Term qualified as Term (Config (NoTracing, Tracing), LogLevel (LogInfo), TracingMode (DoTracing), compile)
 import Plutarch.Script (serialiseScript)
 
 data CompileMode = COMPILE_PROD | COMPILE_DEBUG deriving stock (Show, Read, Eq)
@@ -21,12 +21,12 @@ data CompileOpts = CompileOpts
 compile :: CompileOpts -> IO ()
 compile opts = do
   let cfg = case co'Mode opts of
-        COMPILE_PROD -> Plutarch.Config Plutarch.NoTracing
-        COMPILE_DEBUG -> Plutarch.Config Plutarch.DoTracing
+        COMPILE_PROD -> Term.NoTracing
+        COMPILE_DEBUG -> Term.Tracing Term.LogInfo Term.DoTracing
 
-  eqValidatorCompiled <- either (\err -> fail $ "Failed compiling eqValidator with " <> show err) pure (Plutarch.compile cfg eqValidator)
-  mintingPolicyCompiled <- either (\err -> fail $ "Failed compiling mintingPolicy with " <> show err) pure (Plutarch.compile cfg mintingPolicy)
-  refInputMintingPolicyCompiled <- either (\err -> fail $ "Failed compiling refInputMintingPolicy with " <> show err) pure (Plutarch.compile cfg refInputMintingPolicy)
+  eqValidatorCompiled <- either (\err -> fail $ "Failed compiling eqValidator with " <> show err) pure (Term.compile cfg eqValidator)
+  mintingPolicyCompiled <- either (\err -> fail $ "Failed compiling mintingPolicy with " <> show err) pure (Term.compile cfg mintingPolicy)
+  refInputMintingPolicyCompiled <- either (\err -> fail $ "Failed compiling refInputMintingPolicy with " <> show err) pure (Term.compile cfg refInputMintingPolicy)
 
   let config =
         toJsonBytes $

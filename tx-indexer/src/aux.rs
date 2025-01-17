@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use data_encoding::HEXLOWER;
 use plutus_ledger_api::{
     csl::{csl_to_pla::TryToPLA, lib as csl},
-    v2::{
+    v3::{
         address::Address,
         crypto::LedgerBytes,
         script::{MintingPolicyHash, ScriptHash},

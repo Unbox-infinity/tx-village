@@ -1,16 +1,6 @@
 { inputs, ... }: {
   perSystem = { system, pkgs, config, inputs', self', ... }:
     let
-      oura = pkgs.stdenv.mkDerivation {
-        src = "${inputs.oura.outPath}";
-        name = "oura-v1";
-        unpackPhase = ''
-          mkdir $out
-          cp -r $src/* $out
-          cd $out
-        '';
-      };
-
       rustFlake =
         inputs.flake-lang.lib.${system}.rustFlake {
           src = ./.;
@@ -20,7 +10,6 @@
             config.packages.tx-bakery-ogmios-rust-src
             config.packages.tx-indexer-rust-src
             config.packages.diesel-derive-pg-rust-src
-            oura
           ];
           buildInputs = [ pkgs.postgresql_16.lib ];
 
@@ -30,14 +19,17 @@
 
           devShellHook = config.settings.shell.hook + ''
             ln -sf ${../../tx-indexer}/lib-migrations
+
+            echo "TxIndexer testsuite"
+            echo ""
+            echo "Run `tx-indexer-tests` to execute the testsuite."
+            echo "or `tx-indexer-tests up db_migration ogmios cardano_devnet -t=true` to spin up an environment"
+            echo ""
           '';
         };
     in
     {
       inherit (rustFlake) devShells packages;
-      checks = {
-        "tx-indexer-testsuite" = self'.packages.tx-indexer-tests;
-      };
 
       cardano-devnet.initialFunds = {
         "60a5587dc01541d4ad17d7a4416efee274d833f2fc894eef79976a3d06" = 9000000000;
@@ -47,9 +39,12 @@
         imports = [
           inputs.services-flake.processComposeModules.default
         ];
+        cli.environment.PC_DISABLE_TUI = true;
         services.postgres."db" = {
           enable = true;
           port = 5555;
+          package = pkgs.postgresql_16;
+          dataDir = ".pg";
           initialDatabases = [
             {
               name = "tx_indexer";
@@ -65,6 +60,10 @@
               ogmios.condition = "process_healthy";
               db.condition = "process_healthy";
               db_migration.condition = "process_completed_successfully";
+            };
+            availability = {
+              exit_on_end = true;
+              exit_on_skipped = true;
             };
           };
 
@@ -100,11 +99,11 @@
             command = ''
               ${pkgs.diesel-cli}/bin/diesel migration run \
                 --database-url postgres://127.0.0.1:5555/tx_indexer \
-                --migration-dir ./lib-migrations
+                --migration-dir ${../../tx-indexer/lib-migrations}
 
               ${pkgs.diesel-cli}/bin/diesel migration run \
                 --database-url postgres://127.0.0.1:5555/tx_indexer \
-                --migration-dir ./app-migrations
+                --migration-dir ${./app-migrations}
             '';
             depends_on.db.condition = "process_healthy";
           };

@@ -1,18 +1,18 @@
 //! Transaction Info builder
 
 use num_bigint::BigInt;
-use plutus_ledger_api::v2::{
-    address::StakingCredential,
+use plutus_ledger_api::v3::{
+    address::Credential,
     assoc_map::AssocMap,
     crypto::{LedgerBytes, PaymentPubKeyHash},
     datum::{Datum, DatumHash},
     interval::Interval,
     redeemer::Redeemer,
     transaction::{
-        DCert, POSIXTimeRange, ScriptPurpose, TransactionHash, TransactionInfo, TransactionInput,
-        TransactionOutput, TxInInfo,
+        GovernanceActionId, POSIXTimeRange, ProposalProcedure, ScriptPurpose, TransactionHash,
+        TransactionInfo, TransactionInput, TransactionOutput, TxCert, TxInInfo, Vote, Voter,
     },
-    value::{AssetClass, Value},
+    value::{AssetClass, Lovelace, Value},
 };
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -22,10 +22,14 @@ pub struct TxScaffold {
     reference_inputs: BTreeMap<TransactionInput, TransactionOutput>,
     outputs: Vec<TransactionOutput>,
     mint: Vec<(AssetClass, i64, Redeemer)>,
-    dcert: Vec<DCert>,
-    withdrawals: BTreeMap<StakingCredential, u64>,
+    tx_certs: Vec<TxCert>,
+    withdrawals: BTreeMap<Credential, u64>,
     valid_range: POSIXTimeRange,
     signatories: BTreeSet<PaymentPubKeyHash>,
+    votes: BTreeMap<Voter, BTreeMap<GovernanceActionId, Vote>>,
+    proposal_procedures: Vec<ProposalProcedure>,
+    current_treasury_amount: Option<BigInt>,
+    treasury_donation: Option<BigInt>,
 }
 
 /// Input to a transaction
@@ -59,10 +63,14 @@ impl Default for TxScaffold {
             reference_inputs: BTreeMap::new(),
             outputs: Vec::new(),
             mint: Vec::new(),
-            dcert: Vec::new(),
+            tx_certs: Vec::new(),
             withdrawals: BTreeMap::new(),
             valid_range: Interval::Always.into(),
             signatories: BTreeSet::new(),
+            votes: BTreeMap::new(),
+            proposal_procedures: Vec::new(),
+            current_treasury_amount: None,
+            treasury_donation: None,
         }
     }
 }
@@ -153,26 +161,26 @@ impl TxScaffold {
         self
     }
 
-    /// Add a DCert
-    pub fn add_dcert(mut self, dcert: DCert) -> Self {
-        self.dcert.push(dcert);
+    /// Add a Tx Cert
+    pub fn add_txcert(mut self, dcert: TxCert) -> Self {
+        self.tx_certs.push(dcert);
         self
     }
 
-    /// Add multiple DCerts
-    pub fn add_dcerts(mut self, mut dcerts: Vec<DCert>) -> Self {
-        self.dcert.append(&mut dcerts);
+    /// Add multiple TxCerts
+    pub fn add_dcerts(mut self, mut dcerts: Vec<TxCert>) -> Self {
+        self.tx_certs.append(&mut dcerts);
         self
     }
 
     /// Add a withdrawal
-    pub fn add_withdrawals(mut self, mut withdrawals: BTreeMap<StakingCredential, u64>) -> Self {
+    pub fn add_withdrawals(mut self, mut withdrawals: BTreeMap<Credential, u64>) -> Self {
         self.withdrawals.append(&mut withdrawals);
         self
     }
 
     /// Add multiple withdrawals
-    pub fn add_withdrawal(mut self, staking_credential: StakingCredential, amount: u64) -> Self {
+    pub fn add_withdrawal(mut self, staking_credential: Credential, amount: u64) -> Self {
         self.withdrawals.insert(staking_credential, amount);
         self
     }
@@ -192,6 +200,31 @@ impl TxScaffold {
     /// Add multiple required signers of the transaction
     pub fn add_signatories(mut self, mut signatories: BTreeSet<PaymentPubKeyHash>) -> Self {
         self.signatories.append(&mut signatories);
+        self
+    }
+
+    pub fn add_votes(
+        mut self,
+        mut votes: BTreeMap<Voter, BTreeMap<GovernanceActionId, Vote>>,
+    ) -> Self {
+        self.votes.append(&mut votes);
+        self
+    }
+
+    pub fn add_proposal_procedures(
+        mut self,
+        mut proposal_procedures: Vec<ProposalProcedure>,
+    ) -> Self {
+        self.proposal_procedures.append(&mut proposal_procedures);
+        self
+    }
+
+    pub fn add_current_treasury_amount(mut self, current_treasury_amount: Option<BigInt>) -> Self {
+        self.current_treasury_amount = current_treasury_amount;
+        self
+    }
+    pub fn add_treasury_donation(mut self, treasury_donation: Option<BigInt>) -> Self {
+        self.treasury_donation = treasury_donation;
         self
     }
 
@@ -218,7 +251,7 @@ impl TxScaffold {
                 })
                 .collect(),
             outputs: self.outputs,
-            fee: Value::new(),
+            fee: Lovelace(BigInt::ZERO),
             mint: self
                 .mint
                 .iter()
@@ -230,11 +263,11 @@ impl TxScaffold {
                             &BigInt::from(*amount),
                         )
                 }),
-            d_cert: self.dcert,
+            tx_certs: self.tx_certs,
             wdrl: AssocMap(
                 self.withdrawals
                     .into_iter()
-                    .map(|(staking_credential, amount)| (staking_credential, BigInt::from(amount)))
+                    .map(|(credential, amount)| (credential, Lovelace(BigInt::from(amount))))
                     .collect(),
             ),
             valid_range: self.valid_range,
@@ -266,6 +299,15 @@ impl TxScaffold {
                     .collect(),
             ),
             id: TransactionHash(LedgerBytes(Vec::new())),
+            votes: AssocMap(
+                self.votes
+                    .into_iter()
+                    .map(|(voter, votes)| (voter, AssocMap(votes.into_iter().collect())))
+                    .collect(),
+            ),
+            proposal_procedures: self.proposal_procedures,
+            current_treasury_amount: self.current_treasury_amount.map(Lovelace),
+            treasury_donation: self.treasury_donation.map(Lovelace),
         }
     }
 }

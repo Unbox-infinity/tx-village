@@ -69,11 +69,11 @@ pub(crate) struct OutputReference {
     index: u32,
 }
 
-impl TryFrom<pla::v2::transaction::TransactionInput> for OutputReference {
+impl TryFrom<pla::v3::transaction::TransactionInput> for OutputReference {
     type Error = OgmiosError;
 
     fn try_from(
-        i: pla::v2::transaction::TransactionInput,
+        i: pla::v3::transaction::TransactionInput,
     ) -> std::result::Result<Self, Self::Error> {
         let transaction = TransactionId::from(i.transaction_id);
         let index = u32::try_from(i.index).map_err(|err| OgmiosError::ConversionError {
@@ -228,7 +228,7 @@ pub(crate) enum Script {
     },
 }
 
-impl TryFrom<&Utxo> for pla::v2::transaction::TransactionInput {
+impl TryFrom<&Utxo> for pla::v3::transaction::TransactionInput {
     type Error = OgmiosError;
 
     fn try_from(resp: &Utxo) -> Result<Self> {
@@ -239,11 +239,11 @@ impl TryFrom<&Utxo> for pla::v2::transaction::TransactionInput {
     }
 }
 
-impl TryFrom<&TransactionId> for pla::v2::transaction::TransactionHash {
+impl TryFrom<&TransactionId> for pla::v3::transaction::TransactionHash {
     type Error = OgmiosError;
 
     fn try_from(resp: &TransactionId) -> Result<Self> {
-        Ok(Self(pla::v2::crypto::LedgerBytes(
+        Ok(Self(pla::v3::crypto::LedgerBytes(
             HEXLOWER
                 .decode(&resp.id.clone().into_bytes())
                 .map_err(|source| OgmiosError::ConversionError {
@@ -254,25 +254,25 @@ impl TryFrom<&TransactionId> for pla::v2::transaction::TransactionHash {
     }
 }
 
-impl TryFrom<TransactionId> for pla::v2::transaction::TransactionHash {
+impl TryFrom<TransactionId> for pla::v3::transaction::TransactionHash {
     type Error = OgmiosError;
 
-    fn try_from(resp: TransactionId) -> Result<pla::v2::transaction::TransactionHash> {
+    fn try_from(resp: TransactionId) -> Result<pla::v3::transaction::TransactionHash> {
         (&resp).try_into()
     }
 }
 
-impl From<&pla::v2::transaction::TransactionHash> for TransactionId {
-    fn from(tx_hash: &pla::v2::transaction::TransactionHash) -> TransactionId {
-        let pla::v2::transaction::TransactionHash(pla::v2::crypto::LedgerBytes(bytes)) = tx_hash;
+impl From<&pla::v3::transaction::TransactionHash> for TransactionId {
+    fn from(tx_hash: &pla::v3::transaction::TransactionHash) -> TransactionId {
+        let pla::v3::transaction::TransactionHash(pla::v3::crypto::LedgerBytes(bytes)) = tx_hash;
         TransactionId {
             id: HEXLOWER.encode(bytes),
         }
     }
 }
 
-impl From<pla::v2::transaction::TransactionHash> for TransactionId {
-    fn from(tx_hash: pla::v2::transaction::TransactionHash) -> TransactionId {
+impl From<pla::v3::transaction::TransactionHash> for TransactionId {
+    fn from(tx_hash: pla::v3::transaction::TransactionHash) -> TransactionId {
         From::from(&tx_hash)
     }
 }
@@ -281,16 +281,16 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
     type Error = OgmiosError;
 
     fn try_from(utxo: &Utxo) -> Result<FullTransactionOutput> {
-        let value = pla::v2::value::Value(
+        let value = pla::v3::value::Value(
             utxo.value
                 .iter()
                 .map(|(cur_sym, tokens)| {
                     let cur_sym: Result<_> = if cur_sym == "ada" {
-                        Ok(pla::v2::value::CurrencySymbol::Ada)
+                        Ok(pla::v3::value::CurrencySymbol::Ada)
                     } else {
-                        Ok(pla::v2::value::CurrencySymbol::NativeToken(
-                            pla::v2::script::MintingPolicyHash(pla::v2::script::ScriptHash(
-                                pla::v2::crypto::LedgerBytes(
+                        Ok(pla::v3::value::CurrencySymbol::NativeToken(
+                            pla::v3::script::MintingPolicyHash(pla::v3::script::ScriptHash(
+                                pla::v3::crypto::LedgerBytes(
                                     HEXLOWER.decode(&cur_sym.clone().into_bytes()).map_err(
                                         |source| OgmiosError::ConversionError {
                                             label: "MintingPolicyHash".to_string(),
@@ -306,9 +306,9 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
                         .iter()
                         .map(|(token_name, amount)| {
                             let token_name: Result<_> = if token_name == "lovelace" {
-                                Ok(pla::v2::value::TokenName::ada())
+                                Ok(pla::v3::value::TokenName::ada())
                             } else {
-                                Ok(pla::v2::value::TokenName(pla::v2::crypto::LedgerBytes(
+                                Ok(pla::v3::value::TokenName(pla::v3::crypto::LedgerBytes(
                                     HEXLOWER.decode(&token_name.clone().into_bytes()).map_err(
                                         |source| OgmiosError::ConversionError {
                                             label: "TokenName".to_string(),
@@ -323,7 +323,7 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
 
                     Ok((cur_sym?, tokens?))
                 })
-                .collect::<Result<BTreeMap<pla::v2::value::CurrencySymbol, _>>>()?,
+                .collect::<Result<BTreeMap<pla::v3::value::CurrencySymbol, _>>>()?,
         );
 
         let datum = if let Some(dh) = &utxo.datum_hash {
@@ -334,8 +334,8 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
                     source: anyhow!(source),
                 })?;
 
-            pla::v2::datum::OutputDatum::DatumHash(pla::v2::datum::DatumHash(
-                pla::v2::crypto::LedgerBytes(bytes),
+            pla::v3::datum::OutputDatum::DatumHash(pla::v3::datum::DatumHash(
+                pla::v3::crypto::LedgerBytes(bytes),
             ))
         } else if let Some(d) = &utxo.datum {
             let plutus_data =
@@ -343,11 +343,11 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
                     label: "PlutusData".to_string(),
                     source: anyhow!(source),
                 })?;
-            pla::v2::datum::OutputDatum::InlineDatum(pla::v2::datum::Datum(
+            pla::v3::datum::OutputDatum::InlineDatum(pla::v3::datum::Datum(
                 plutus_data.try_to_pla()?,
             ))
         } else {
-            pla::v2::datum::OutputDatum::None
+            pla::v3::datum::OutputDatum::None
         };
 
         let reference_script = utxo
@@ -369,6 +369,7 @@ impl TryFrom<&Utxo> for FullTransactionOutput {
                         let plutus_version = match &language[..] {
                             "plutus:v1" => csl::Language::new_plutus_v1(),
                             "plutus:v2" => csl::Language::new_plutus_v2(),
+                            "plutus:v3" => csl::Language::new_plutus_v3(),
                             _ => Err(OgmiosError::ConversionError {
                                 label: "Plutus language".to_string(),
                                 source: anyhow!("Couldn't parse Plutus language version."),

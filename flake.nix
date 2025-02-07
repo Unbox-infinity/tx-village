@@ -23,7 +23,7 @@
     plutarch.follows = "lbf/plutarch";
 
     # Light-weight wrapper around cardano-node
-    ogmios.url = "github:mlabs-haskell/ogmios-nix?ref=v6.6.2";
+    ogmios.url = "github:mlabs-haskell/ogmios-nix?ref=v6.9.0";
 
     oura = {
       flake = false;
@@ -32,9 +32,9 @@
 
     cardano-nix.url = "github:mlabs-haskell/cardano.nix";
 
-    cardano-devnet-flake.url = "github:szg251/cardano-devnet-flake";
+    cardano-devnet-flake.url = "github:szg251/cardano-devnet-flake?ref=cardano-node-10.1.2";
 
-    cardano-node.url = "github:IntersectMBO/cardano-node?ref=9.1.0";
+    cardano-node.follows = "cardano-devnet-flake/cardano-node";
 
     process-compose-flake.url = "github:Platonic-Systems/process-compose-flake";
     services-flake.url = "github:juspay/services-flake";

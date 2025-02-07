@@ -6,7 +6,7 @@
     lbf.url = "github:mlabs-haskell/lambda-buffers?ref=szg251/bump-pla-rust";
 
     # Flake monorepo toolkit
-    flake-lang.url = "github:mlabs-haskell/flake-lang.nix";
+    flake-lang.url = "github:mlabs-haskell/flake-lang.nix?ref=szg251/fix-plutus";
 
     # Nix
     nixpkgs.follows = "lbf/nixpkgs";

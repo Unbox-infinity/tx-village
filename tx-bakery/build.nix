@@ -1,5 +1,5 @@
 { inputs, ... }: {
-  perSystem = { config, inputs', system, ... }:
+  perSystem = { config, inputs', system, pkgs, ... }:
 
     let
       rustFlake = inputs.flake-lang.lib."${system}".rustFlake
@@ -8,6 +8,9 @@
           version = "v2";
           crateName = "tx-bakery";
           cargoNextestExtraArgs = "--no-capture";
+
+          nativeBuildInputs = [ pkgs.openssl pkgs.cacert ];
+          buildInputs = [ pkgs.openssl pkgs.cacert ];
 
           extraSources = [
             # LB base schema and runtime libs

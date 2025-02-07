@@ -117,7 +117,7 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               (intervalValidRange currentTime (currentTime + 1))
               [ownPubKeyHash]
-              (AssocMap.fromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
+              (AssocMap.unsafeFromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
               AssocMap.empty
               dummyTxId
     , ledgerTestCase "Simple Spending TX" $
@@ -175,8 +175,8 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               (intervalValidRange currentTime (currentTime' + 1))
               [ownPubKeyHash]
-              (AssocMap.fromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
-              (AssocMap.fromList [(datumHash, datum)])
+              (AssocMap.unsafeFromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
+              (AssocMap.unsafeFromList [(datumHash, datum)])
               dummyTxId
     , ledgerTestCase "Invalid Range"
         $ ledgerFailsBy @()
@@ -303,7 +303,7 @@ tests dummyScriptHash ledgerCfg =
                 AssocMap.empty
                 IV.always
                 [ownPubKeyHash]
-                (AssocMap.fromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
+                (AssocMap.unsafeFromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
                 AssocMap.empty
                 dummyTxId
           let newUTxORef = TxOutRef txId 0
@@ -400,7 +400,7 @@ tests dummyScriptHash ledgerCfg =
                 AssocMap.empty
                 IV.always
                 [ownPubKeyHash]
-                (AssocMap.fromList [(Spending ref, Redeemer $ toBuiltinData ())])
+                (AssocMap.unsafeFromList [(Spending ref, Redeemer $ toBuiltinData ())])
                 AssocMap.empty
                 dummyTxId
     , ledgerTestCase "Missing Datum Witness" $
@@ -471,7 +471,7 @@ tests dummyScriptHash ledgerCfg =
                     AssocMap.empty
                     IV.always
                     [ownPubKeyHash]
-                    (AssocMap.fromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
+                    (AssocMap.unsafeFromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
                     AssocMap.empty
                     dummyTxId
     , ledgerTestCase "Missing Policy Invocation"
@@ -579,7 +579,7 @@ tests dummyScriptHash ledgerCfg =
               IV.always
               [ownPubKeyHash]
               AssocMap.empty
-              (AssocMap.fromList [(datumHash, datum)])
+              (AssocMap.unsafeFromList [(datumHash, datum)])
               dummyTxId
     , ledgerTestCase "Missing Datum In Script Output"
         $ ledgerFailsBy @()
@@ -658,7 +658,7 @@ tests dummyScriptHash ledgerCfg =
                 AssocMap.empty
                 IV.always
                 [ownPubKeyHash]
-                (AssocMap.fromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
+                (AssocMap.unsafeFromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
                 AssocMap.empty
                 dummyTxId
           let newUTxORef = TxOutRef txId 0
@@ -683,7 +683,7 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               IV.always
               [ownPubKeyHash]
-              (AssocMap.fromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
+              (AssocMap.unsafeFromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
               AssocMap.empty
               dummyTxId
     , ledgerTestCase "Non-normal Mint"
@@ -728,7 +728,7 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               IV.always
               [ownPubKeyHash]
-              (AssocMap.fromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
+              (AssocMap.unsafeFromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
               AssocMap.empty
               dummyTxId
     , ledgerTestCase "Non-normal Output Value"
@@ -776,7 +776,7 @@ tests dummyScriptHash ledgerCfg =
                 AssocMap.empty
                 IV.always
                 [ownPubKeyHash]
-                (AssocMap.fromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
+                (AssocMap.unsafeFromList [(Minting cs, Redeemer (toBuiltinData @Integer 1234))])
                 AssocMap.empty
                 dummyTxId
     , ledgerTestCase "Invalid Currency Symbol/Token Name/Address" $
@@ -967,7 +967,7 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               IV.always
               [ownPubKeyHash]
-              (AssocMap.fromList [(Minting invalidCurrencySymbol, Redeemer (toBuiltinData @Integer 1234))])
+              (AssocMap.unsafeFromList [(Minting invalidCurrencySymbol, Redeemer (toBuiltinData @Integer 1234))])
               AssocMap.empty
               dummyTxId
     , ledgerTestCase "Non-disjoint Reference Inputs"
@@ -1030,8 +1030,8 @@ tests dummyScriptHash ledgerCfg =
               AssocMap.empty
               (intervalValidRange currentTime (currentTime' + 1))
               [ownPubKeyHash]
-              (AssocMap.fromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
-              (AssocMap.fromList [(datumHash, datum)])
+              (AssocMap.unsafeFromList [(Spending newUTxORef, Redeemer $ toBuiltinData ())])
+              (AssocMap.unsafeFromList [(datumHash, datum)])
               dummyTxId
     ]
 

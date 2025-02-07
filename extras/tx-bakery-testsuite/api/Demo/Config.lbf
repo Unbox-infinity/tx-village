@@ -9,6 +9,7 @@ derive Json Script
 
 record Config = {
   eqValidator : Script,
+  eqValidatorV2 : Script,
   mintingPolicy : Script,
   refInputMintingPolicy : Script
 }

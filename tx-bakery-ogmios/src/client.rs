@@ -14,7 +14,7 @@ use jsonrpsee::{
 use plutus_ledger_api::csl::pla_to_csl::TryToCSL;
 use plutus_ledger_api::{
     csl::lib as csl,
-    v2::{
+    v3::{
         address::Address,
         transaction::{TransactionHash, TransactionInput},
     },

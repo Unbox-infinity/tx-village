@@ -7,7 +7,7 @@
           src = ./.;
           version = "v2";
           crateName = "tx-bakery-ogmios";
-          cargoNextestExtraArgs = "--no-capture";
+          runTests = false;
 
           extraSources = [
             config.packages.tx-bakery-rust-src

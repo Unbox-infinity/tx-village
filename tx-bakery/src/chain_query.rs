@@ -6,10 +6,12 @@ use std::str::FromStr;
 
 use chrono::{DateTime, Duration, Utc};
 use plutus_ledger_api::csl::{csl_to_pla::ToPLA, lib as csl};
-use plutus_ledger_api::v2::address::Address;
-use plutus_ledger_api::v2::datum::OutputDatum;
-use plutus_ledger_api::v2::transaction::{TransactionInput, TransactionOutput};
-use plutus_ledger_api::v2::value::Value;
+use plutus_ledger_api::v3::{
+    address::Address,
+    datum::OutputDatum,
+    transaction::{TransactionInput, TransactionOutput},
+    value::Value,
+};
 use serde::Deserialize;
 use thiserror::Error;
 

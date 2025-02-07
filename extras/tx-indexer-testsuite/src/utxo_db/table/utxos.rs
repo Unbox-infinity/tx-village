@@ -1,6 +1,6 @@
 use crate::utxo_db::error::UtxoIndexerError;
 use diesel::prelude::*;
-use plutus_ledger_api::v2::{
+use plutus_ledger_api::v3::{
     address::Address,
     transaction::{TransactionInput, TxInInfo},
 };

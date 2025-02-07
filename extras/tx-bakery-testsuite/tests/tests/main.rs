@@ -1,7 +1,7 @@
 use lbf_tx_bakery_tests_plutus_api::demo::plutus::{EqDatum, EqRedeemer, RefInputRedeemer};
 use num_bigint::BigInt;
 use plutus_ledger_api::plutus_data::IsPlutusData;
-use plutus_ledger_api::v2::{
+use plutus_ledger_api::v3::{
     address::{Address, Credential},
     crypto::LedgerBytes,
     datum::{Datum, OutputDatum},
@@ -802,11 +802,11 @@ mod tests {
     use lbf_tx_bakery_tests_plutus_api::demo::plutus::{EqDatum, EqRedeemer, Product, Record, Sum};
     use lbr_prelude::json::Json;
     use num_bigint::BigInt;
-    use plutus_ledger_api::v2::address::{Address, Credential};
-    use plutus_ledger_api::v2::crypto::LedgerBytes;
-    use plutus_ledger_api::v2::datum::OutputDatum;
-    use plutus_ledger_api::v2::transaction::{POSIXTime, TransactionInput};
-    use plutus_ledger_api::v2::value::{AssetClass, CurrencySymbol, TokenName};
+    use plutus_ledger_api::v3::address::{Address, Credential};
+    use plutus_ledger_api::v3::crypto::LedgerBytes;
+    use plutus_ledger_api::v3::datum::OutputDatum;
+    use plutus_ledger_api::v3::transaction::{POSIXTime, TransactionInput};
+    use plutus_ledger_api::v3::value::{AssetClass, CurrencySymbol, TokenName};
     use serial_test::serial;
     use std::fs;
     use std::path::Path;
@@ -862,7 +862,70 @@ mod tests {
     #[serial]
     async fn test_is_eq_validator() -> Result<()> {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let eq_validator = ScriptOrRef::from_bytes(config.eq_validator.0)
+        let eq_validator = ScriptOrRef::from_bytes_v3(config.eq_validator.0)
+            .unwrap()
+            .as_validator();
+        let (example_eq_datum_a, _) = setup_test_data();
+
+        let test_runtime = TestRuntime::setup_testnet().await;
+
+        let wallet = test_runtime.get_own_wallet().await;
+        let ogmios = test_runtime.ogmios_client();
+
+        let tx_hash_lock_a = lock_eq_datum::build_and_submit(
+            &wallet,
+            ogmios,
+            ogmios,
+            eq_validator.clone(),
+            &example_eq_datum_a,
+        )
+        .await?;
+
+        ogmios.await_tx_confirm(&tx_hash_lock_a).await?;
+
+        // TODO(chfanghr): We need something more thorough than this
+        assert_eq!(
+            ogmios
+                .query_utxos_by_ref(vec![
+                    &TransactionInput {
+                        transaction_id: tx_hash_lock_a.clone(),
+                        index: 0u8.into(),
+                    },
+                    &TransactionInput {
+                        transaction_id: tx_hash_lock_a.clone(),
+                        index: 1u8.into(),
+                    },
+                    &TransactionInput {
+                        transaction_id: tx_hash_lock_a.clone(),
+                        index: 3u8.into(),
+                    }
+                ])
+                .await?
+                .into_keys()
+                .map(|r| r.index)
+                .collect::<Vec<_>>(),
+            vec![0.into(), 1.into()],
+        );
+
+        let tx_hash_claim_a = claim_eq_datum::build_and_submit(
+            &wallet,
+            ogmios,
+            ogmios,
+            eq_validator,
+            &EqRedeemer::IsEqual(example_eq_datum_a.clone()),
+            &example_eq_datum_a,
+        )
+        .await?;
+
+        ogmios.await_tx_confirm(&tx_hash_claim_a).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_is_eq_validator_v2() -> Result<()> {
+        let config = read_config("data/tx-bakery-test-scripts-config.json");
+        let eq_validator = ScriptOrRef::from_bytes_v2(config.eq_validator_v2.0)
             .unwrap()
             .as_validator();
         let (example_eq_datum_a, _) = setup_test_data();
@@ -925,7 +988,7 @@ mod tests {
     #[serial]
     async fn test_mint() -> Result<()> {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let minting_policy = ScriptOrRef::from_bytes(config.minting_policy.0)
+        let minting_policy = ScriptOrRef::from_bytes_v3(config.minting_policy.0)
             .unwrap()
             .as_minting_policy();
 
@@ -952,12 +1015,13 @@ mod tests {
     #[serial]
     async fn test_ref_input() -> Result<()> {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let eq_validator = ScriptOrRef::from_bytes(config.eq_validator.0)
+        let eq_validator = ScriptOrRef::from_bytes_v3(config.eq_validator.0)
             .unwrap()
             .as_validator();
-        let ref_input_minting_policy = ScriptOrRef::from_bytes(config.ref_input_minting_policy.0)
-            .unwrap()
-            .as_minting_policy();
+        let ref_input_minting_policy =
+            ScriptOrRef::from_bytes_v3(config.ref_input_minting_policy.0)
+                .unwrap()
+                .as_minting_policy();
         let (example_eq_datum_a, _) = setup_test_data();
 
         let test_runtime = TestRuntime::setup_testnet().await;
@@ -994,7 +1058,7 @@ mod tests {
     #[serial]
     async fn test_zero_ada_mint() -> Result<()> {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let minting_policy = ScriptOrRef::from_bytes(config.minting_policy.0)
+        let minting_policy = ScriptOrRef::from_bytes_v3(config.minting_policy.0)
             .unwrap()
             .as_minting_policy();
 
@@ -1014,7 +1078,7 @@ mod tests {
     #[serial]
     async fn test_ref_script() -> Result<()> {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let minting_policy = ScriptOrRef::from_bytes(config.minting_policy.0)
+        let minting_policy = ScriptOrRef::from_bytes_v3(config.minting_policy.0)
             .unwrap()
             .as_minting_policy();
 
@@ -1095,7 +1159,7 @@ mod tests {
 
     fn setup_test_data() -> (EqDatum, EqDatum) {
         let config = read_config("data/tx-bakery-test-scripts-config.json");
-        let plutarch_script = ScriptOrRef::from_bytes(config.eq_validator.0)
+        let plutarch_script = ScriptOrRef::from_bytes_v3(config.eq_validator.0)
             .unwrap()
             .as_validator();
 

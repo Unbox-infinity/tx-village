@@ -3,7 +3,7 @@ use anyhow::Context;
 use data_encoding::HEXLOWER;
 use num_bigint::BigInt;
 use plutus_ledger_api::csl::{csl_to_pla::TryToPLA, lib as csl};
-use plutus_ledger_api::v2::{
+use plutus_ledger_api::v3::{
     address::Address,
     crypto::LedgerBytes,
     datum::{Datum, DatumHash},

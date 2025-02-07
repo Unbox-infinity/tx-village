@@ -1,6 +1,6 @@
 //! Trait for a component capable of submitting transactions
 
-use plutus_ledger_api::{csl::lib as csl, v2::transaction::TransactionHash};
+use plutus_ledger_api::{csl::lib as csl, v3::transaction::TransactionHash};
 use std::collections::BTreeMap;
 use std::future::Future;
 use thiserror::Error;

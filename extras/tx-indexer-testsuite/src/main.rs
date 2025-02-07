@@ -4,7 +4,7 @@ use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool},
 };
-use plutus_ledger_api::v2::{
+use plutus_ledger_api::v3::{
     datum::OutputDatum,
     transaction::TransactionInput,
     value::{CurrencySymbol, Value},

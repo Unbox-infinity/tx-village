@@ -1,7 +1,7 @@
 use oura::filters::selection::{Config, Predicate};
 use plutus_ledger_api::{
     csl::{lib as csl, pla_to_csl::TryFromPLA},
-    v2::{script::MintingPolicyHash, value::CurrencySymbol},
+    v3::{script::MintingPolicyHash, value::CurrencySymbol},
 };
 
 /// Interesting transaction components to look for when filtering transactions

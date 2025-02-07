@@ -11,16 +11,18 @@ use itertools::Itertools;
 use num_bigint::BigInt;
 use plutus_ledger_api::csl::{lib as csl, pla_to_csl::TryToCSL};
 use plutus_ledger_api::plutus_data::IsPlutusData;
-use plutus_ledger_api::v2::address::{Address, AddressWithExtraInfo, Credential};
-use plutus_ledger_api::v2::crypto::PaymentPubKeyHash;
-use plutus_ledger_api::v2::datum::{Datum, DatumHash, OutputDatum};
-use plutus_ledger_api::v2::redeemer::{Redeemer, RedeemerWithExtraInfo};
-use plutus_ledger_api::v2::script::{MintingPolicyHash, ScriptHash, ValidatorHash};
-use plutus_ledger_api::v2::transaction::{
-    ScriptPurpose, TransactionHash, TransactionInfo, TransactionInput, TransactionOutput,
-    TransactionOutputWithExtraInfo, TxInInfo,
+use plutus_ledger_api::v3::{
+    address::{Address, AddressWithExtraInfo, Credential},
+    crypto::PaymentPubKeyHash,
+    datum::{Datum, DatumHash, OutputDatum},
+    redeemer::{Redeemer, RedeemerWithExtraInfo},
+    script::{MintingPolicyHash, ScriptHash, ValidatorHash},
+    transaction::{
+        ScriptPurpose, TransactionHash, TransactionInfo, TransactionInput, TransactionOutput,
+        TransactionOutputWithExtraInfo, TxInInfo,
+    },
+    value::{CurrencySymbol, Value},
 };
-use plutus_ledger_api::v2::value::{CurrencySymbol, Value};
 use std::collections::BTreeMap;
 use submitter::Submitter;
 use tracing::{debug, info};
@@ -666,8 +668,16 @@ impl TxBakery {
         let tx_builder = self.mk_tx_builder(tx)?;
 
         let (datums, redeemers) = TxBakery::extract_witnesses(tx.tx_info)?;
+        let (wit_scripts, ref_scripts) = TxBakery::collect_scripts(tx.tx_info, tx.scripts)?;
 
-        self.balance_transaction(tx, tx_builder, &datums, &redeemers)
+        self.balance_transaction(
+            tx,
+            tx_builder,
+            &datums,
+            &redeemers,
+            &wit_scripts,
+            &ref_scripts,
+        )
     }
 
     /// Extract witness datums and redeemers from TransactionInfo
@@ -729,11 +739,11 @@ impl TxBakery {
     }
 
     /// Collect witness scripts (validators and mintig policies)
-    fn witness_scripts(
+    fn collect_scripts(
         tx_info: &TransactionInfo,
         scripts: &BTreeMap<ScriptHash, ScriptOrRef>,
-    ) -> Result<Vec<csl::PlutusScript>> {
-        Ok(tx_info
+    ) -> Result<(Vec<csl::PlutusScript>, Vec<csl::PlutusScript>)> {
+        let res = tx_info
             .inputs
             .iter()
             .filter_map(
@@ -762,11 +772,12 @@ impl TxBakery {
             })
             .collect::<Result<Vec<_>>>()?
             .into_iter()
-            .filter_map(|script_or_ref| match script_or_ref {
-                ScriptOrRef::PlutusScript(script) => Some(script),
-                ScriptOrRef::RefScript(_, _) => None,
-            })
-            .collect())
+            .partition_map(|script_or_ref| match script_or_ref {
+                ScriptOrRef::PlutusScript(script) => itertools::Either::Left(script),
+                ScriptOrRef::RefScript(_, script) => itertools::Either::Right(script),
+            });
+
+        Ok(res)
     }
 
     /// Calculate script integrity hash
@@ -775,6 +786,8 @@ impl TxBakery {
         mut tx_builder: csl::TransactionBuilder,
         wit_datums: &[csl::PlutusData],
         wit_redeemers: &[csl::Redeemer],
+        wit_scripts: &[csl::PlutusScript],
+        ref_scripts: &[csl::PlutusScript],
     ) -> csl::TransactionBuilder {
         debug!("Calculating script integrity hash");
         let mut redeemers = csl::Redeemers::new();
@@ -790,7 +803,13 @@ impl TxBakery {
             };
 
             let mut used_langs = csl::Languages::new();
-            used_langs.add(csl::Language::new_plutus_v2());
+            wit_scripts.iter().chain(ref_scripts).for_each(|script| {
+                match script.language_version().kind() {
+                    csl::LanguageKind::PlutusV1 => used_langs.add(csl::Language::new_plutus_v1()),
+                    csl::LanguageKind::PlutusV2 => used_langs.add(csl::Language::new_plutus_v2()),
+                    csl::LanguageKind::PlutusV3 => used_langs.add(csl::Language::new_plutus_v3()),
+                }
+            });
 
             let script_data_hash = csl::hash_script_data(
                 &redeemers,
@@ -826,12 +845,20 @@ impl TxBakery {
         mut tx_builder: csl::TransactionBuilder,
         wit_datums: &[csl::PlutusData],
         wit_redeemers: &[csl::Redeemer],
+        wit_scripts: &[csl::PlutusScript],
+        ref_scripts: &[csl::PlutusScript],
     ) -> Result<csl::TransactionBody> {
         debug!("Balance transaction");
         let mut redeemers = csl::Redeemers::new();
         wit_redeemers.iter().for_each(|red| redeemers.add(red));
 
-        tx_builder = self.calc_script_data_hash(tx_builder, wit_datums, wit_redeemers);
+        tx_builder = self.calc_script_data_hash(
+            tx_builder,
+            wit_datums,
+            wit_redeemers,
+            wit_scripts,
+            ref_scripts,
+        );
 
         let (change_addr, change_datum) = match tx.change_strategy {
             ChangeStrategy::Address(address) => (
@@ -885,7 +912,7 @@ impl TxBakery {
     ) -> Result<csl::FixedTransaction> {
         info!("Bake balanced transaction.");
         let (datums, redeemers) = TxBakery::extract_witnesses(tx.tx_info)?;
-        let plutus_scripts = TxBakery::witness_scripts(tx.tx_info, tx.scripts)?;
+        let (wit_scripts, ref_scripts) = TxBakery::collect_scripts(tx.tx_info, tx.scripts)?;
 
         let aux_data: Result<Option<csl::AuxiliaryData>> = tx
             .metadata
@@ -907,7 +934,7 @@ impl TxBakery {
                 let tx_builder = self.mk_tx_builder(&tx)?;
 
                 let ex_units = submitter
-                    .evaluate_transaction(&tx_builder, &plutus_scripts, &redeemers)
+                    .evaluate_transaction(&tx_builder, &wit_scripts, &redeemers)
                     .await?;
 
                 debug!("Applying execution units to transaction.");
@@ -924,14 +951,23 @@ impl TxBakery {
             .map(|r| TxBakery::apply_ex_units(r, &ex_units))
             .collect::<Result<Vec<_>>>()?;
 
-        let tx_body = self.balance_transaction(&tx, tx_builder, &datums, &redeemers_w_ex_u)?;
+        let tx_body = self.balance_transaction(
+            &tx,
+            tx_builder,
+            &datums,
+            &redeemers_w_ex_u,
+            &wit_scripts,
+            &ref_scripts,
+        )?;
 
         let mut witness_set = csl::TransactionWitnessSet::new();
         let mut script_witnesses = csl::PlutusScripts::new();
 
-        plutus_scripts
+        wit_scripts
             .iter()
             .for_each(|script| script_witnesses.add(script));
+
+        // let ref_scripts = tx.tx_info.reference_inputs.iter().any(|tx_in_info| tx_in_info.output.reference_script.is_so);
 
         let mut redeemer_witnesses = csl::Redeemers::new();
 

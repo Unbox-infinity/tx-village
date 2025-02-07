@@ -3,7 +3,8 @@ module Demo.Plutus
 
 import Prelude
 import qualified Plutus.V1 as Plutus
-import Plutus.V1 (PlutusData, AssetClass, Address, TxOutRef)
+import Plutus.V1 (PlutusData, AssetClass, Address)
+import Plutus.V3 (TxOutRef)
 
 record Record a = {
   foo : AssetClass,

@@ -19,14 +19,14 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 strum = "0.24"
 strum_macros = "0.24"
-plutus-ledger-api = { version = "2.1.0", features = ["chrono", "serde"] }
+plutus-ledger-api = { version = "3.0.2", features = ["chrono", "serde"] }
 chrono = "0.4.38"
 prettytable-rs = "0.10.0"
 diesel = { version = "2.2.4", features = ["postgres", "serde_json", "r2d2"] }
 serial_test = "3.1.1"
 tx-bakery-ogmios = { path = ".extras/tx-bakery-ogmios-v2" }
 tx-bakery = { path = ".extras/tx-bakery-v2" }
-oura = { path = ".extras/oura-v1" }
+oura = { git = "https://github.com/szg251/oura", tag = "v1.9.2" }
 num-bigint = "0.4.4"
 sqlx = { version = "0.8.2", features = [
   "postgres",

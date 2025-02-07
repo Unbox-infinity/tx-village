@@ -1,44 +1,44 @@
 [package]
 name = "tx-bakery"
-version = "2.0.0-beta.3"
+version = "2.0.0-beta.4"
 edition = "2021"
 license = "Apache-2.0"
 description = "Cardano transaction builder"
 repository = "https://github.com/mlabs-haskell/tx-village"
 
 [dependencies]
-plutus-ledger-api = { version = "2.1.0", features = ["lbf", "chrono"] }
-num-bigint = { version = "0.4.4", features = ["serde"] }
-serde_json = { version = "1.0.111", features = ["raw_value"] }
-serde = "1.0.195"
+plutus-ledger-api = { version = "^3.0.1", features = ["lbf", "chrono"] }
+num-bigint = { version = "0.4.6", features = ["serde"] }
+serde_json = { version = "1.0.135", features = ["raw_value"] }
+serde = "1.0.217"
 derive_builder = "0.12.0"
-jsonrpsee = { version = "0.22.2", features = ["ws-client", "macros"] }
+jsonrpsee = { version = "0.22.5", features = ["ws-client", "macros"] }
 cbor_event = "2.4.0"
-tokio = { version = "1.35.1", features = [
+tokio = { version = "1.43.0", features = [
   "time",
   "process",
   "rt",
   "macros",
   "fs",
 ] }
-data-encoding = "2.5.0"
-anyhow = { version = "1.0.79", features = ["backtrace"] }
-thiserror = "1.0.57"
-chrono = "0.4.35"
-futures = "0.3.30"
-num-traits = "0.2.18"
+data-encoding = "2.6.0"
+anyhow = { version = "1.0.95", features = ["backtrace"] }
+thiserror = "1.0.69"
+chrono = "0.4.39"
+futures = "0.3.31"
+num-traits = "0.2.19"
 assertables = "7.0.1"
 wait-timeout = "0.2.0"
-url = "2.5.2"
-clap = { version = "4.5.14", features = ["derive"], optional = true }
-tracing = "0.1.40"
+url = "2.5.4"
+clap = { version = "4.5.24", features = ["derive"], optional = true }
+tracing = "0.1.41"
 itertools = "0.13.0"
 
 [dev-dependencies]
-proptest = "1.4.0"
+proptest = "1.6.0"
 lbf-tx-bakery-tests-config-api = { path = ".extras/lbf-tx-bakery-tests-config-api-0.1.0" }
 lbf-tx-bakery-tests-plutus-api = { path = ".extras/lbf-tx-bakery-tests-plutus-api-0.1.0" }
-lbr-prelude = { version = "0.1.1", features = ["derive"] }
+lbr-prelude = { version = "0.1.3", features = ["derive"] }
 lbf-prelude = { path = ".extras/lbf-prelude-0.1.0" }
 
 [features]

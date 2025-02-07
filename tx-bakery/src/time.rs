@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use chrono::{DateTime, Duration, Utc};
 use plutus_ledger_api::{
     csl::lib as csl,
-    v2::{
+    v3::{
         interval::{Extended, LowerBound, PlutusInterval, UpperBound},
         transaction::{POSIXTime, POSIXTimeConversionError, POSIXTimeRange},
     },

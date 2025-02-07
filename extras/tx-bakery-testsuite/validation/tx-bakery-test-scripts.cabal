@@ -90,12 +90,14 @@ library
     , lbf-tx-bakery-tests-plutus-api-plutarch
     , lbr-plutarch
     , plutarch
+    , plutarch-ledger-api
 
   hs-source-dirs:  src
   exposed-modules:
     Demo.Mint
     Demo.RefInput
     Demo.Validation
+    Demo.ValidationV2
 
 executable tx-bakery-test-scripts-cli
   import:         common-language

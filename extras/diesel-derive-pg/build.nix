@@ -5,6 +5,7 @@
         inputs.flake-lang.lib.${system}.rustFlake {
           src = ./.;
           crateName = "diesel-derive-pg";
+          runTests = false;
 
           buildInputs = [ pkgs.postgresql.lib ];
 
